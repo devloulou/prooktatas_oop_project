@@ -9,10 +9,18 @@ import json
 
 class FileHandler:
     folder_path = r"C:\WORK\Prooktatás\oop_project\movies"
+
+    poster_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'posters')
+    meta_data_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'meta_data')
     #def __init__(self, folder_path: str):
     def __init__(self):
-        pass
-        #self.folder_path = folder_path
+        self._create_necessary_folders()
+
+    def _create_necessary_folders(self):
+        if not os.path.exists(self.poster_folder):
+            os.mkdir(self.poster_folder)
+        if not os.path.exists(self.meta_data_folder):
+            os.mkdir(self.meta_data_folder)
 
     def delete_file(self, file_path):
         try:
