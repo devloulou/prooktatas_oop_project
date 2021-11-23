@@ -47,3 +47,4 @@ if __name__ == '__main__':
     data = test.get_json_data('Alien')
 
     print(data)
+    
