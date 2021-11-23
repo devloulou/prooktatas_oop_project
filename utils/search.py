@@ -1,10 +1,10 @@
 # van egy listán, amiben .mkv file-ok vannak
 # ezekhez a file-okhoz akarunk letölteni 
-    # képeket
-    # szöveges állományt -> json
+    # képeket -> pipa
+    # szöveges állományt -> json -> pipa
     # még egyéb metaadatokat
     # ha mégiscsak a listában van az elem, akkor próbáljuk megtalálni a megfelelőt
-
+# később refakotorálnoi fogjuk a kódot: python loggert fogunk használni
 
 import tmdbsimple as tmdb
 from urllib.request import urlopen
@@ -22,28 +22,44 @@ class Search:
             raise Exception("Nem adtál meg film címet, kérlek pótold")
         try:
             search = tmdb.Search()
-            response = search.movie(query=movie_name)['results'][0]
+            response = search.movie(query=movie_name)['results']
+
         except Exception as e:
             return False, str(e)
 
-        return response
+        return response[0] if response else False
 
-    def get_posters(self):
-        pass
+    def _get_poster_link(self, data):
+        return f"{self.image_path_string}{data['poster_path']}"
+        
+    def write_image(self, data, movie_name):
+        if not data:
+            return False, "There is no data"
 
-    def get_poster_link(self):
-        pass
-        #return 
+        poster_link = self._get_poster_link(data)
 
-    def write_image(self):
-        pass
+        try:
+            with open(movie_name + '.jpg', "wb") as poster:
+                poster.write(urlopen(poster_link).read())
+        except Exception as e:
+            return False, str(e)
 
 
 if __name__ == '__main__':
     test = Search()
 
-    print(test.image_path_string)
+    #print(test.image_path_string)
 
-    data = test.get_json_data('Alien')
+    movie_name = 'Braveheart'
+
+    data = test.get_json_data(movie_name)
 
     print(data)
+
+    if not data:
+        print(f"error at query data from api: {data}")
+        exit()
+
+    test.write_image(data, movie_name)
+
+    
