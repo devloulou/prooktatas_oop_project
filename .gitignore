@@ -1,2 +1,5 @@
 .vscode/
 venv/
+meta_data/
+posters/
+utils/__pycache__/
