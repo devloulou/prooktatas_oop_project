@@ -3,6 +3,44 @@
 # ki kell írni a képeket - itt oldjuk meg, vagy a lekérés osztályánál
 # törölni a képeket
 # törölni a metaadatot
+
+# mi van akkor, ha hiányzik törölted a filemt
+# metaadat hiányzik
+# poster hiányzik
+
+# file alapú
+
+# adatbázis kezelés:
+
+# Mongodb  - NoSQL
+# Compass
+
+# jelenleg 1 mappából tudunk csak filmet felolvasni, azt szeretnénk, hogy képes legyen megoldás
+# több mappa egyidejű kezelésére -> mappákat lehessen törölni, hozzáadni
+# többszálasítás - lehetőségek - kell e -> itt elméleti szinten a következőket kell megemlíteni:
+# thread - multiprocessing -> multiprocessing -> GIL Global Interpreter Lock
+# statisztikák: hány filmem van, metaadatokból mit lehetne - opcionális
+# statiszkákhoz plot - ennél a feladatnál opcionális
+
+###############################################################################################
+# postgres - minimális sql
+# pandas - yml, csv, ini, xml - numpy
+# ORM - Object relational mapping -> miért nem szeretem,
+# miért szeretik mások,
+# és miért nem szeretik az adatbázis közeli emberek
+
+# postgres - adatbázis driver
+
+# rest api - 
+
+# UI-os projekt
+# plot
+# folyamat figyelés - töltö monitoring
+# minimális docker - basics: mi a docker; hogyan lehet futtatni, leállítani, logokat ellenőrizni; docker-compose mint orchestrator - alapjai
+# adatbetöltések
+# 
+#
+
 import os
 import json
 
@@ -52,12 +90,53 @@ class FileHandler:
 
         return True
 
-    def get_list(self):
+    def get_movie_list(self):
         if not os.path.exists(self.folder_path):
             return False, "The given path is not exists"
         
-        return [file for file in os.listdir(self.folder_path) if file[-3:] in ('mkv')]
+        return [file[:-4] for file in os.listdir(self.folder_path) if file[-3:] in ('mkv')]
 
+
+    def get_meta_data_list(self):
+        return  [ meta[:-5] for meta in os.listdir(self.meta_data_folder)]
+
+    def get_poster_list(self):
+        return [poster[:-4] for poster in os.listdir(self.poster_folder)]
+
+
+    def get_diff(self):
+        # van metaadat de nincs poster - pipa
+        # poster van, de nincs metaadat - pipa
+        meta_data_list = self.get_meta_data_list()
+        poster_list = self.get_poster_list()
+        movie_list = self.get_movie_list()
+
+        # missing_poster = []
+
+        # missing_meta = []
+
+        # for meta in meta_data_list:
+        #     if meta not in poster_list:
+        #         missing_poster.append(meta)
+
+        # for poster in poster_list:
+        #     if poster not in meta_data_list:
+        #         missing_meta.append(poster)
+        # nincs film, de van metaadat
+        # nincs film de van poster
+        # refaktoráljuk majd azt, hogy ne a get_list, get_meta_data_list stb-nél őrizzük meg a kiterjesztést
+        need_to_delete_meta = [meta for meta in meta_data_list if meta not in movie_list]
+        need_to_delete_poster = [poster for poster in poster_list if poster not in movie_list]
+        need_to_download_meta = [movie for movie in movie_list if movie not in meta_data_list]
+        need_to_download_poster = [movie for movie in movie_list if movie not in poster_list]
+
+
+        return {
+                "need_to_delete_meta": need_to_delete_meta,
+                "need_to_delete_poster": need_to_delete_poster,
+                "need_to_download_meta": need_to_download_meta,
+                "need_to_download_poster": need_to_download_poster
+                }
 
 
 class FileHandler2(FileHandler):
@@ -78,21 +157,25 @@ class FileHandler2(FileHandler):
         return number ** 2
 
 
-
 if __name__ == '__main__':
     folder_path = r"C:\WORK\Prooktatás\oop_project\movies"
-    # handler = FileHandler()
+    handler = FileHandler()
 
     # print(handler.get_list())
 
     # handler.write_file("test.json", {"kulcs": "érték"})
     # handler.delete_file("test.json")
 
-    handler_2 = FileHandler2()
-    print(handler_2.get_list())
+    #handler_2 = FileHandler2()
+    #print(handler_2.get_list())
 
-    handler_2.write_file("test.txt", "Nagyon jó ez az oop")
+    #handler_2.write_file("test.txt", "Nagyon jó ez az oop")
 
-    print(FileHandler2().first_cls())
+    # print(FileHandler2().first_cls())
 
-    print(FileHandler2().first_static(5))
+    # print(FileHandler2().first_static(5))
+
+    print(handler.get_meta_data_list())
+    print(handler.get_poster_list())
+    print(handler.get_diff())
+    #print(handler.get_movie_list())
