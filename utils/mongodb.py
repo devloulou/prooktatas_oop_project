@@ -91,13 +91,25 @@ def delete_document(query):
 
     return collection.delete_one(query).deleted_count
 
+
 def delete_many_documents(query):
     collection = get_collection('test_collection')    
 
     return collection.delete_many(query).deleted_count
 
 
+def update_document(query):
+    collection = get_collection('test_collection')
 
+    # update_one(query -> ami magát a keresési feltétel  - > {"kulcs": "érték"}, {"$set": {"mezó_név": "érték"}}, upsert=True/False
+    # )
+    return collection.update_one(query, {"$set": {"type": "sport"}}, upsert=True).upserted_id
+
+
+def update_many_docs(query):
+    collection = get_collection('test_collection')
+
+    return collection.update_many(query, {"$set": {"motor_type": "elektromos"}}, upsert=True).upserted_id
 
 if __name__ == '__main__':
     #con = get_database()
@@ -132,12 +144,20 @@ if __name__ == '__main__':
         {"sütemény": "palacsinta", "leves": "kelkáposzta", "főétel": "rántotthúz rizsával"},    
     ]
 
-    #ids = insert_many_documents(temp_data)
+    ids = insert_many_documents(temp_data)
 
     #print(ids)
 
-    #del_count = delete_document({"sütemény": "palacsinta"})
+    #del_count = delete_document({"_id" : ObjectId("61a66e007edd5e67b0325022")})
     
 
-    del_count = delete_many_documents({"sütemény": "palacsinta"})
-    print(del_count)
+    # del_count = delete_many_documents({"sütemény": "palacsinta"})
+    # print(del_count)
+    # query = {"auto": "purle"}
+    # print(update_document(query))
+
+    # query = {"auto":{'$regex': '^p'}}
+
+    # print(update_many_docs(query))
+
+

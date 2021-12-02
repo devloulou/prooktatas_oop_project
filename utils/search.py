@@ -50,12 +50,15 @@ class Search:
             return False, "There is no data"
 
         poster_link = self._get_poster_link(data)
+        poster_path = os.path.join(self.file_handler.poster_folder, self.movie_name + '.jpg')
 
         try:
-            with open(os.path.join(self.file_handler.poster_folder, self.movie_name + '.jpg'), "wb") as poster:
+            with open(poster_path, "wb") as poster:
                 poster.write(urlopen(poster_link).read())
         except Exception as e:
             return False, str(e)
+
+        return poster_path
 
     def write_meta_data(self, data):
         if not os.path.exists(self.file_handler.meta_data_folder):
