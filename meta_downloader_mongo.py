@@ -12,12 +12,20 @@ def download_metadata():
     file_handler = FileHandler()
 
     # az összes adatot , teljes egészében lekérjük -> ezt majd refaktorálni kellene
-    database_movies = [{movie['search_name']: movie['poster_file_path']} for movie in db.get_documents({})]
     poster_list = file_handler.get_poster_list()
 
-    print(database_movies)
-
     movies = [movie['search_name'] for movie in db.get_documents({})]
+    poster_path = [{movie['search_name']: movie['poster_path']} for movie in db.get_documents({})]
+
+    for item in movies:
+        if item not in poster_list:
+            for poster in poster_path:
+                if list(poster.keys())[0] == item:
+                    data = {"poster_path":list(poster.values())[0] }
+                    search.movie_name = item
+                    search.write_image(data)
+                    print(item)
+
     for movie in file_handler.get_movie_list():
         # database_movies[movie] -> ez a poster_path értékét adja vissza
 
