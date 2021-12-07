@@ -1,5 +1,15 @@
 version: '3.8'
 services:
+    postgres:
+      image: postgres:latest
+      environment:
+        POSTGRES_USER: "postgres"
+        POSTGRES_PASSWORD: "postgres"
+        POSTGRES_DB: "postgres"
+      volumes:
+        - "postgres:/var/lib/postgresql/data"
+      ports:
+        - "5432:5432"
     mongodb_container:
       image: mongo:latest
       environment:
@@ -11,4 +21,5 @@ services:
       volumes:
         - mongodb_data_container:/data/db
 volumes:
+  postgres:
   mongodb_data_container:

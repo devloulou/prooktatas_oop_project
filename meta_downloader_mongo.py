@@ -21,7 +21,7 @@ def download_metadata():
         if item not in poster_list:
             for poster in poster_path:
                 if list(poster.keys())[0] == item:
-                    data = {"poster_path":list(poster.values())[0] }
+                    data = {"poster_path": list(poster.values())[0] }
                     search.movie_name = item
                     search.write_image(data)
                     print(item)
@@ -40,10 +40,6 @@ def download_metadata():
                 data['poster_file_path'] = poster_path
 
             db.insert_document(data)
-
-    
-
-
     # diff = search.file_handler.get_diff() # ez a logika itt nem használható
 
     # print(diff)
