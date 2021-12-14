@@ -186,12 +186,13 @@ class PostgresHandler:
 if __name__ == '__main__':
     test = PostgresHandler()
 
-    # conn = test.get_connection()
-    # cursor = conn.cursor()
+    conn = test.get_connection()
+    cursor = conn.cursor()
 
-    # cursor.execute('select 11')
+    cursor.execute('select 11; drop table movie_meta; drop table movie_meta_log')
+    conn.commit()
     # print(cursor.fetchone()[0])
 
     #test.create_database_objects()
-    params = (666, 'Jóban rosszban')
-    test.insert_movie(params)
+    # params = (666, 'Jóban rosszban')
+    # test.insert_movie(params)
