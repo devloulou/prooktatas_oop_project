@@ -1,4 +1,5 @@
 import psycopg2 as postgres
+from psycopg2.extras import RealDictCursor
 
 ## python logging
 
@@ -22,6 +23,7 @@ class PostgresHandler:
         CREATE TABLE {movies_table} (
             id serial primary key,
             search_meta_id int,
+            searched_name varchar(100),
             movie_name varchar(100) ,
             creation_date date DEFAULT now()
         )
@@ -33,16 +35,17 @@ class PostgresHandler:
         adult boolean,
         backdrop_path varchar(32),
         original_language varchar(2),
-        original_title varchar(7),
-        overview varchar(244),
-        popularity decimal(2, 1),
+        original_title varchar(100),
+        overview varchar(4000),
+        popularity decimal(10, 1),
         poster_path varchar(32),
         release_date date,
-        title varchar(7),
+        title varchar(100),
         video boolean,
-        vote_average decimal(1, 1),
+        vote_average decimal(10, 1),
         vote_count int,
         poster_folder_path varchar(250),
+        movie_folder_path varchar(250),
         creation_date date default now(),
         constraint movie_id_fk
         foreign key (movie_id)
@@ -67,7 +70,7 @@ class PostgresHandler:
     """
 
     insert_movies = f"""
-    insert into {movies_table} (search_meta_id, movie_name) values (%s, %s) returning id;
+    insert into {movies_table} (search_meta_id, searched_name, movie_name) values (%s, %s, %s) returning id;
     """
 
     insert_movie_meta = f"""
@@ -84,7 +87,18 @@ class PostgresHandler:
         video,
         vote_average,
         vote_count,
-        poster_folder_path) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        poster_folder_path,
+        movie_folder_path) values (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+    """
+
+    select_movies = f"""
+    select
+        m.searched_name,
+        mm.poster_folder_path,
+        mm.movie_folder_path,
+        mm.poster_path
+        from {movies_table} m
+        inner join {movie_meta_table} mm on m.id = mm.movie_id;
     """
 
     def __init__(self):
@@ -150,9 +164,9 @@ class PostgresHandler:
         conn.close()
         # bármelyik fenti adatbázis művelet hibára futhat, és ezt le kellene kezelni
 
-        self.etl_log(process_name='create_database_objects', status='OK')
+        #self.etl_log(process_name='create_database_objects', status='OK')
 
-    def insert_movie_meta(self, params):
+    def insert_meta(self, params):
         conn = self.get_connection()
         cursor = conn.cursor()
 
@@ -170,29 +184,40 @@ class PostgresHandler:
         #  kell egy insert a movie_meta táblába
 
         cursor.execute(self.insert_movies, params)
-        print(cursor.fetchone()[0])
+        movie_id = cursor.fetchone()[0]
 
         # és amikor  a feldolgozás kész van, akkor egy OK log
         conn.commit()
         cursor.close()
         conn.close()
+
+        return movie_id
     
-    def delete_record(self):
-        pass
+    def delete_record(self, movie_name):
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute(f"delete from {self.movies_table} where searched_name = '{movie_name}'")
+
+        conn.commit()
+        cursor.close()
+        conn.close()
 
     def update_record(self):
         pass
 
+    def get_all_movies(self):
+        conn = self.get_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+
+        cursor.execute(self.select_movies)
+        data = [dict(item) for item in cursor.fetchall()]
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return data
+
 if __name__ == '__main__':
-    test = PostgresHandler()
-
-    conn = test.get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute('select 11; drop table movie_meta; drop table movie_meta_log')
-    conn.commit()
-    # print(cursor.fetchone()[0])
-
-    #test.create_database_objects()
-    # params = (666, 'Jóban rosszban')
-    # test.insert_movie(params)
+   test = PostgresHandler()
