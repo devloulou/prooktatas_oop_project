@@ -4,3 +4,6 @@ meta_data/
 posters/
 utils/__pycache__/
 utils/connection_params.py
+alien.db
+films.db
+movies.db
