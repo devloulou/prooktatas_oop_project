@@ -7,3 +7,5 @@ utils/connection_params.py
 alien.db
 films.db
 movies.db
+cars.db
+orm/mini_project/__pycache__/
