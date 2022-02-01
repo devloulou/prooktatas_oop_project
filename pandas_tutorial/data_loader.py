@@ -35,23 +35,48 @@ if __name__ == '__main__':
     all_weeks_global_data = get_data(r"C:\WORK\Prooktatás\prooktatas\prooktatas_oop_project\pandas_tutorial\all-weeks-global.csv")
     most_popular_data = get_data(r"C:\WORK\Prooktatás\prooktatas\prooktatas_oop_project\pandas_tutorial\most-popular.csv")
     
-    df = pd.merge(all_weeks_country_data, all_weeks_global_data, on=["show_title", "season_title"], how="inner")
+    # SqLite minden korlátjával
+    test_df = all_weeks_global_data[["weekly_rank", "show_title"]]
 
-    df2 = df.to_json("test.json")
+    #print(test_df.query("weekly_rank >= 1 &  weekly_rank <= 5 "))
 
-    df3 = df[0:4].to_excel("output.xlsx")
+
+    import pandasql as psql
+
+    sdf = lambda e: psql.sqldf(e, globals()) # locals(), globals() ezek a paraméterek vannak
+
+    sql_statement = """
+        select country_name from all_weeks_country_data
+        limit 10
+    """
+
+    data = sdf(sql_statement)
+
+    print(data)
+
+
+    # ha az és kapcsolatot akarom használi, akkor &
+    # ha a vagy kapcsolatot akarom használi, akkor |
+    # az egyenlőség vizsgálata mint a pythonban: ==
+    
+    
+    # df = pd.merge(all_weeks_country_data, all_weeks_global_data, on=["show_title", "season_title"], how="inner")
+
+    # df2 = df.to_json("test.json")
+
+    # df3 = df[0:4].to_excel("output.xlsx")
 
     #print(df.head(100))
     #weekly_hours_viewed
     # country_name
 
-    print(df[["weekly_hours_viewed", "country_name"]].head(100))
+    # print(df[["weekly_hours_viewed", "country_name"]].head(100))
     
-    print(df.shape)
+    # print(df.shape)
 
-    print()
+    # print()
 
-    print(df.info)
+    # print(df.info)
     
     
     # következő lépés: ezeket mergelni
